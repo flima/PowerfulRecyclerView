@@ -1,0 +1,10 @@
+<resources>
+    <string name="app_name">PowerfulRecyclerView</string>
+    <string name="loading">Loading...</string>
+    <string-array name="sample_texts">
+        <item>Sample One</item>
+        <item>Sample Two</item>
+        <item>Sample Three</item>
+        <item>Sample Four</item>
+    </string-array>
+</resources>

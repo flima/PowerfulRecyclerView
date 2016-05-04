@@ -1,0 +1,18 @@
+ext.versions = [
+        code       : 1,
+        name       : '1.0.0',
+
+        minSdk     : 7,
+        targetSdk  : 23,
+        compileSdk : 23,
+        buildTools : '23.0.2',
+
+        // support library version
+        supportLibs: '23.2.1',
+]
+
+ext.libraries = [
+        supportRecyclerView: "com.android.support:recyclerview-v7:$versions.supportLibs",
+        supportAppCompat   : "com.android.support:appcompat-v7:$versions.supportLibs",
+        supportDesign      : "com.android.support:design:$versions.supportLibs"
+]
