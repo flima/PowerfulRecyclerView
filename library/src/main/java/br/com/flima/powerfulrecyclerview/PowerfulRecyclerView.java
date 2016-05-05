@@ -6,6 +6,7 @@ import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.RecyclerView;
 import android.util.AttributeSet;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.ViewStub;
 import android.widget.FrameLayout;
 
@@ -83,29 +84,32 @@ public class PowerfulRecyclerView extends FrameLayout {
 
     private void initLayout() {
         inflate(getContext(), R.layout.template_layout, this);
-
-        if (isInEditMode()) {
-            return;
-        }
-
         setupRecyclerView();
     }
 
     private void setupRecyclerView() {
-        mRecyclerView = (RecyclerView) findViewById(R.id.recycler_view);
-        mSwipeRefreshLayout = (SwipeRefreshLayout) findViewById(R.id.swipe_refresh_layout);
-        if (mPadding == 0) {
-            mRecyclerView.setPadding(mPaddingLeft, mPaddingTop, mPaddingRight, mPaddingBottom);
-        } else {
-            mRecyclerView.setPadding(mPadding, mPadding, mPadding, mPadding);
-        }
+        final ViewGroup.LayoutParams layoutParams = new ViewGroup.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
+        mRecyclerView = new RecyclerView(getContext());
+        mRecyclerView.setLayoutParams(layoutParams);
+        setRecyclerPadding();
         if (mSwipeRefreshEnabled) {
-            final int[] colorSchemeResources = getColorSchemeResourcesValid();
-            if (colorSchemeResources != null) {
-                mSwipeRefreshLayout.setColorSchemeResources(getColorSchemeResourcesValid());
-            }
-            mSwipeRefreshLayout.setSize(mSwipeRefreshSize);
+            mSwipeRefreshLayout = new SwipeRefreshLayout(getContext());
+            mSwipeRefreshLayout.setLayoutParams(layoutParams);
+            mSwipeRefreshLayout.addView(mRecyclerView);
+            addView(mSwipeRefreshLayout);
+            initSwipeRefreshOptions();
+        } else {
+            addView(mRecyclerView);
         }
+    }
+
+    private void initSwipeRefreshOptions() {
+        final int[] colorSchemeResources = getColorSchemeResourcesValid();
+        if (colorSchemeResources != null) {
+            mSwipeRefreshLayout.setColorSchemeResources(getColorSchemeResourcesValid());
+        }
+        mSwipeRefreshLayout.setSize(mSwipeRefreshSize);
     }
 
     private void inflateLoadingLayout() {
@@ -164,7 +168,7 @@ public class PowerfulRecyclerView extends FrameLayout {
         if (mLoadingLayout != null) {
             mLoadingLayout.setVisibility(VISIBLE);
             mRecyclerView.setVisibility(GONE);
-            mSwipeRefreshLayout.setEnabled(false);
+            setupSwipeRefreshLayoutToDisabled();
         }
         if (mEmptyLayout != null) {
             mEmptyLayout.setVisibility(GONE);
@@ -183,7 +187,7 @@ public class PowerfulRecyclerView extends FrameLayout {
         if (mEmptyLayout != null) {
             mEmptyLayout.setVisibility(VISIBLE);
             mRecyclerView.setVisibility(GONE);
-            mSwipeRefreshLayout.setEnabled(false);
+            setupSwipeRefreshLayoutToDisabled();
         }
         if (mErrorLayout != null) {
             mErrorLayout.setVisibility(GONE);
@@ -203,7 +207,7 @@ public class PowerfulRecyclerView extends FrameLayout {
         if (mErrorLayout != null) {
             mErrorLayout.setVisibility(VISIBLE);
             mRecyclerView.setVisibility(GONE);
-            mSwipeRefreshLayout.setEnabled(false);
+
         }
         if (mEmptyLayout != null) {
             mEmptyLayout.setVisibility(GONE);
@@ -219,7 +223,6 @@ public class PowerfulRecyclerView extends FrameLayout {
     }
 
     private void showRecyclerView() {
-        mSwipeRefreshLayout.setEnabled(mSwipeRefreshEnabled);
         mRecyclerView.setVisibility(VISIBLE);
         if (mEmptyLayout != null) {
             mEmptyLayout.setVisibility(GONE);
@@ -231,6 +234,7 @@ public class PowerfulRecyclerView extends FrameLayout {
             mLoadingLayout.setVisibility(GONE);
         }
         swipeRefreshLayoutRemoveRefresh();
+        setupSwipeRefreshLayoutToEnabled();
     }
 
     private int[] getColorSchemeResourcesValid() {
@@ -258,30 +262,63 @@ public class PowerfulRecyclerView extends FrameLayout {
         }
     }
 
+    private void setRecyclerPadding() {
+        if (mPadding == 0) {
+            mRecyclerView.setPadding(mPaddingLeft, mPaddingTop, mPaddingRight, mPaddingBottom);
+        } else {
+            mRecyclerView.setPadding(mPadding, mPadding, mPadding, mPadding);
+        }
+    }
+
+    private void setupSwipeRefreshLayoutToEnabled() {
+        if (mSwipeRefreshEnabled) {
+            mSwipeRefreshLayout.setEnabled(true);
+        }
+    }
+
+    private void setupSwipeRefreshLayoutToDisabled() {
+        if (mSwipeRefreshEnabled) {
+            mSwipeRefreshLayout.setEnabled(false);
+        }
+    }
+
     private void swipeRefreshLayoutRemoveRefresh() {
-        if(swipeRefreshLayoutIsRefreshing()){
-            setSwipeRefreshLayoutRefreshing(false);
+        if (mSwipeRefreshEnabled) {
+            if (swipeRefreshLayoutIsRefreshing()) {
+                setSwipeRefreshLayoutRefreshing(false);
+            }
         }
     }
 
     public boolean swipeRefreshLayoutIsRefreshing() {
+        if (!mSwipeRefreshEnabled) {
+            return false;
+        }
         return mSwipeRefreshLayout.isRefreshing();
     }
 
     public void setSwipeRefreshLayoutRefreshing(boolean refreshing) {
-        mSwipeRefreshLayout.setRefreshing(refreshing);
+        if (mSwipeRefreshEnabled) {
+            mSwipeRefreshLayout.setRefreshing(refreshing);
+        }
     }
 
     public void setSwipeRefreshLayoutSize(int size) {
-        mSwipeRefreshLayout.setSize(size);
+        if (mSwipeRefreshEnabled) {
+            mSwipeRefreshLayout.setSize(size);
+        }
     }
 
     public void setSwipeRefreshLayoutOnRefreshListener(SwipeRefreshLayout.OnRefreshListener onRefreshListener) {
-        mSwipeRefreshLayout.setOnRefreshListener(onRefreshListener);
+        if (mSwipeRefreshEnabled) {
+            mSwipeRefreshLayout.setOnRefreshListener(onRefreshListener);
+        }
     }
 
     public void setSwipeRefreshLayoutColorSchemeResources(int... colors) {
-        mSwipeRefreshLayout.setColorSchemeResources(colors);
+        if (mSwipeRefreshEnabled) {
+            mSwipeRefreshLayout.setColorSchemeResources(colors);
+        }
     }
 
     public void setOnLoadingInflate(OnViewInflateListener onLoadingInflate) {
