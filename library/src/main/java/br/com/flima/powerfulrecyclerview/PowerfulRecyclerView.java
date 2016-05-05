@@ -2,11 +2,15 @@ package br.com.flima.powerfulrecyclerview;
 
 import android.content.Context;
 import android.content.res.TypedArray;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.RecyclerView;
 import android.util.AttributeSet;
 import android.view.View;
 import android.view.ViewStub;
 import android.widget.FrameLayout;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import br.com.flima.powerfulrecyclerview.listener.OnViewInflateListener;
 
@@ -27,7 +31,21 @@ public class PowerfulRecyclerView extends FrameLayout {
     private OnViewInflateListener mOnEmptyInflateListener;
     private OnViewInflateListener mOnErrorInflateListener;
 
+    private int mPadding;
+    private int mPaddingLeft;
+    private int mPaddingRight;
+    private int mPaddingBottom;
+    private int mPaddingTop;
+
+    private boolean mSwipeRefreshEnabled;
+    private int mSwipeRefreshColorOne;
+    private int mSwipeRefreshColorTwo;
+    private int mSwipeRefreshColorThree;
+    private int mSwipeRefreshColorFour;
+    private int mSwipeRefreshSize;
+
     private RecyclerView mRecyclerView;
+    private SwipeRefreshLayout mSwipeRefreshLayout;
 
     public PowerfulRecyclerView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -46,6 +64,21 @@ public class PowerfulRecyclerView extends FrameLayout {
         mLoadingLayoutId = array.getResourceId(R.styleable.PowerfulRecyclerView_layout_loading, 0);
         mEmptyLayoutId = array.getResourceId(R.styleable.PowerfulRecyclerView_layout_empty, 0);
         mErrorLayoutId = array.getResourceId(R.styleable.PowerfulRecyclerView_layout_error, 0);
+        mPadding = (int) array.getDimension(R.styleable.PowerfulRecyclerView_recycler_padding, 0);
+        if (mPadding == 0) {
+            mPaddingLeft = (int) array.getDimension(R.styleable.PowerfulRecyclerView_recycler_padding_left, 0);
+            mPaddingRight = (int) array.getDimension(R.styleable.PowerfulRecyclerView_recycler_padding_right, 0);
+            mPaddingBottom = (int) array.getDimension(R.styleable.PowerfulRecyclerView_recycler_padding_bottom, 0);
+            mPaddingTop = (int) array.getDimension(R.styleable.PowerfulRecyclerView_recycler_padding_top, 0);
+        }
+        mSwipeRefreshEnabled = array.getBoolean(R.styleable.PowerfulRecyclerView_swipe_to_refresh_enabled, false);
+        if (mSwipeRefreshEnabled) {
+            mSwipeRefreshColorOne = array.getColor(R.styleable.PowerfulRecyclerView_swipe_to_refresh_color_one, 0);
+            mSwipeRefreshColorTwo = array.getColor(R.styleable.PowerfulRecyclerView_swipe_to_refresh_color_two, 0);
+            mSwipeRefreshColorThree = array.getColor(R.styleable.PowerfulRecyclerView_swipe_to_refresh_color_three, 0);
+            mSwipeRefreshColorFour = array.getColor(R.styleable.PowerfulRecyclerView_swipe_to_refresh_color_four, 0);
+            mSwipeRefreshSize = array.getInt(R.styleable.PowerfulRecyclerView_swipe_to_refresh_size, SwipeRefreshLayout.DEFAULT);
+        }
     }
 
     private void initLayout() {
@@ -60,7 +93,19 @@ public class PowerfulRecyclerView extends FrameLayout {
 
     private void setupRecyclerView() {
         mRecyclerView = (RecyclerView) findViewById(R.id.recycler_view);
-        //TODO: SETUP HERE ANOTHER ATTRIBUTES FROM RECYCLER
+        mSwipeRefreshLayout = (SwipeRefreshLayout) findViewById(R.id.swipe_refresh_layout);
+        if (mPadding == 0) {
+            mRecyclerView.setPadding(mPaddingLeft, mPaddingTop, mPaddingRight, mPaddingBottom);
+        } else {
+            mRecyclerView.setPadding(mPadding, mPadding, mPadding, mPadding);
+        }
+        if (mSwipeRefreshEnabled) {
+            final int[] colorSchemeResources = getColorSchemeResourcesValid();
+            if (colorSchemeResources != null) {
+                mSwipeRefreshLayout.setColorSchemeResources(getColorSchemeResourcesValid());
+            }
+            mSwipeRefreshLayout.setSize(mSwipeRefreshSize);
+        }
     }
 
     private void inflateLoadingLayout() {
@@ -119,6 +164,7 @@ public class PowerfulRecyclerView extends FrameLayout {
         if (mLoadingLayout != null) {
             mLoadingLayout.setVisibility(VISIBLE);
             mRecyclerView.setVisibility(GONE);
+            mSwipeRefreshLayout.setEnabled(false);
         }
         if (mEmptyLayout != null) {
             mEmptyLayout.setVisibility(GONE);
@@ -137,6 +183,7 @@ public class PowerfulRecyclerView extends FrameLayout {
         if (mEmptyLayout != null) {
             mEmptyLayout.setVisibility(VISIBLE);
             mRecyclerView.setVisibility(GONE);
+            mSwipeRefreshLayout.setEnabled(false);
         }
         if (mErrorLayout != null) {
             mErrorLayout.setVisibility(GONE);
@@ -144,6 +191,7 @@ public class PowerfulRecyclerView extends FrameLayout {
         if (mLoadingLayout != null) {
             mLoadingLayout.setVisibility(GONE);
         }
+        swipeRefreshLayoutRemoveRefresh();
     }
 
     private void hideEmpty() {
@@ -155,6 +203,7 @@ public class PowerfulRecyclerView extends FrameLayout {
         if (mErrorLayout != null) {
             mErrorLayout.setVisibility(VISIBLE);
             mRecyclerView.setVisibility(GONE);
+            mSwipeRefreshLayout.setEnabled(false);
         }
         if (mEmptyLayout != null) {
             mEmptyLayout.setVisibility(GONE);
@@ -162,6 +211,7 @@ public class PowerfulRecyclerView extends FrameLayout {
         if (mLoadingLayout != null) {
             mLoadingLayout.setVisibility(GONE);
         }
+        swipeRefreshLayoutRemoveRefresh();
     }
 
     public void hideError() {
@@ -169,6 +219,7 @@ public class PowerfulRecyclerView extends FrameLayout {
     }
 
     private void showRecyclerView() {
+        mSwipeRefreshLayout.setEnabled(mSwipeRefreshEnabled);
         mRecyclerView.setVisibility(VISIBLE);
         if (mEmptyLayout != null) {
             mEmptyLayout.setVisibility(GONE);
@@ -179,6 +230,58 @@ public class PowerfulRecyclerView extends FrameLayout {
         if (mLoadingLayout != null) {
             mLoadingLayout.setVisibility(GONE);
         }
+        swipeRefreshLayoutRemoveRefresh();
+    }
+
+    private int[] getColorSchemeResourcesValid() {
+        List<Integer> colors = new ArrayList<Integer>();
+        if (mSwipeRefreshColorOne != 0) {
+            colors.add(mSwipeRefreshColorOne);
+        }
+        if (mSwipeRefreshColorTwo != 0) {
+            colors.add(mSwipeRefreshColorTwo);
+        }
+        if (mSwipeRefreshColorThree != 0) {
+            colors.add(mSwipeRefreshColorThree);
+        }
+        if (mSwipeRefreshColorFour != 0) {
+            colors.add(mSwipeRefreshColorFour);
+        }
+        if (colors.isEmpty()) {
+            return null;
+        } else {
+            int[] colorsReturn = new int[colors.size()];
+            for (int i = 0; i < colors.size(); i++) {
+                colorsReturn[i] = colors.get(i);
+            }
+            return colorsReturn;
+        }
+    }
+
+    private void swipeRefreshLayoutRemoveRefresh() {
+        if(swipeRefreshLayoutIsRefreshing()){
+            setSwipeRefreshLayoutRefreshing(false);
+        }
+    }
+
+    public boolean swipeRefreshLayoutIsRefreshing() {
+        return mSwipeRefreshLayout.isRefreshing();
+    }
+
+    public void setSwipeRefreshLayoutRefreshing(boolean refreshing) {
+        mSwipeRefreshLayout.setRefreshing(refreshing);
+    }
+
+    public void setSwipeRefreshLayoutSize(int size) {
+        mSwipeRefreshLayout.setSize(size);
+    }
+
+    public void setSwipeRefreshLayoutOnRefreshListener(SwipeRefreshLayout.OnRefreshListener onRefreshListener) {
+        mSwipeRefreshLayout.setOnRefreshListener(onRefreshListener);
+    }
+
+    public void setSwipeRefreshLayoutColorSchemeResources(int... colors) {
+        mSwipeRefreshLayout.setColorSchemeResources(colors);
     }
 
     public void setOnLoadingInflate(OnViewInflateListener onLoadingInflate) {
@@ -195,5 +298,9 @@ public class PowerfulRecyclerView extends FrameLayout {
 
     public RecyclerView getRecyclerView() {
         return mRecyclerView;
+    }
+
+    public SwipeRefreshLayout getSwipeRefreshLayout() {
+        return mSwipeRefreshLayout;
     }
 }

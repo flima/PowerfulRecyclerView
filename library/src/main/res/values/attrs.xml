@@ -3,6 +3,22 @@
 
     <declare-styleable name="PowerfulRecyclerView">
 
+        <attr name="recycler_padding" format="dimension" />
+        <attr name="recycler_padding_left" format="dimension" />
+        <attr name="recycler_padding_right" format="dimension" />
+        <attr name="recycler_padding_bottom" format="dimension" />
+        <attr name="recycler_padding_top" format="dimension" />
+
+        <attr name="swipe_to_refresh_enabled" format="boolean" />
+        <attr name="swipe_to_refresh_color_one" format="color" />
+        <attr name="swipe_to_refresh_color_two" format="color" />
+        <attr name="swipe_to_refresh_color_three" format="color" />
+        <attr name="swipe_to_refresh_color_four" format="color" />
+        <attr name="swipe_to_refresh_size" format="enum">
+            <enum name="LARGE" value="0" />
+            <enum name="DEFAULT" value="1" />
+        </attr>
+
         <attr name="layout_empty" format="reference" />
         <attr name="layout_error" format="reference" />
         <attr name="layout_loading" format="reference" />

@@ -13,6 +13,7 @@
         android:layout_height="match_parent"
         app:layout_empty="@layout/layout_empty"
         app:layout_error="@layout/layout_error"
-        app:layout_loading="@layout/layout_loading" />
+        app:layout_loading="@layout/layout_loading"
+        app:swipe_to_refresh_enabled="true" />
 
 </LinearLayout>
