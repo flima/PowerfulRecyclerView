@@ -73,10 +73,10 @@ public class PowerfulRecyclerView extends FrameLayout {
         }
         mSwipeRefreshEnabled = array.getBoolean(R.styleable.PowerfulRecyclerView_swipe_to_refresh_enabled, false);
         if (mSwipeRefreshEnabled) {
-            mSwipeRefreshColorOne = array.getColor(R.styleable.PowerfulRecyclerView_swipe_to_refresh_color_one, 0);
-            mSwipeRefreshColorTwo = array.getColor(R.styleable.PowerfulRecyclerView_swipe_to_refresh_color_two, 0);
-            mSwipeRefreshColorThree = array.getColor(R.styleable.PowerfulRecyclerView_swipe_to_refresh_color_three, 0);
-            mSwipeRefreshColorFour = array.getColor(R.styleable.PowerfulRecyclerView_swipe_to_refresh_color_four, 0);
+            mSwipeRefreshColorOne = array.getResourceId(R.styleable.PowerfulRecyclerView_swipe_to_refresh_color_one, 0);
+            mSwipeRefreshColorTwo = array.getResourceId(R.styleable.PowerfulRecyclerView_swipe_to_refresh_color_two, 0);
+            mSwipeRefreshColorThree = array.getResourceId(R.styleable.PowerfulRecyclerView_swipe_to_refresh_color_three, 0);
+            mSwipeRefreshColorFour = array.getResourceId(R.styleable.PowerfulRecyclerView_swipe_to_refresh_color_four, 0);
             mSwipeRefreshSize = array.getInt(R.styleable.PowerfulRecyclerView_swipe_to_refresh_size, SwipeRefreshLayout.DEFAULT);
         }
     }
