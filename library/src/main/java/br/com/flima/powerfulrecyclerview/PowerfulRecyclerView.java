@@ -207,7 +207,7 @@ public class PowerfulRecyclerView extends FrameLayout {
         if (mErrorLayout != null) {
             mErrorLayout.setVisibility(VISIBLE);
             mRecyclerView.setVisibility(GONE);
-
+            setupSwipeRefreshLayoutToDisabled();
         }
         if (mEmptyLayout != null) {
             mEmptyLayout.setVisibility(GONE);
